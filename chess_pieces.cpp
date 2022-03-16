@@ -9,7 +9,7 @@
 extern Log gLog;
 #endif
 
-LastTurn::LastTurn()
+TurnInfo::TurnInfo()
 {
     from_x = -1;
     from_y = -1;
@@ -18,7 +18,7 @@ LastTurn::LastTurn()
     piece  = nullptr;
 }
 
-void LastTurn::ChangeLastTurn(int old_x, int old_y, int new_x, int new_y,
+void TurnInfo::ChangeTurnInfo(int old_x, int old_y, int new_x, int new_y,
                               ChessPiece *new_piece)
 {
     from_x = old_x;
@@ -36,7 +36,7 @@ ChessPiece::ChessPiece(PieceID pid, TeamID tid) : piece_id(pid), team_id(tid)
 PawnPiece::PawnPiece(TeamID tid) : ChessPiece(PieceID::Pawn, tid) {}
 
 bool PawnPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                             ChessPiece *board[8][8], LastTurn &last_turn)
+                             ChessPiece *board[8][8], TurnInfo &last_turn)
 {
     int success = false;
 #ifndef NDEBUG
@@ -108,7 +108,7 @@ bool PawnPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
 KnightPiece::KnightPiece(TeamID tid) : ChessPiece(PieceID::Knight, tid) {}
 
 bool KnightPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                               ChessPiece *board[8][8], LastTurn &last_turn)
+                               ChessPiece *board[8][8], TurnInfo &last_turn)
 {
     bool success = false;
 
@@ -147,7 +147,7 @@ bool KnightPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
 BishopPiece::BishopPiece(TeamID tid) : ChessPiece(PieceID::Bishop, tid) {}
 
 bool BishopPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                               ChessPiece *board[8][8], LastTurn &last_turn)
+                               ChessPiece *board[8][8], TurnInfo &last_turn)
 {
     bool success = false;
 
@@ -205,7 +205,7 @@ bool BishopPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
 RookPiece::RookPiece(TeamID tid) : ChessPiece(PieceID::Rook, tid) {}
 
 bool RookPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                             ChessPiece *board[8][8], LastTurn &last_turn)
+                             ChessPiece *board[8][8], TurnInfo &last_turn)
 {
     bool success = false;
 
@@ -268,7 +268,7 @@ bool RookPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
 QueenPiece::QueenPiece(TeamID tid) : ChessPiece(PieceID::Queen, tid) {}
 
 bool QueenPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                              ChessPiece *board[8][8], LastTurn &last_turn)
+                              ChessPiece *board[8][8], TurnInfo &last_turn)
 {
     bool success = false;
 
@@ -332,7 +332,7 @@ bool QueenPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
 KingPiece::KingPiece(TeamID tid) : ChessPiece(PieceID::King, tid) {}
 
 bool KingPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                             ChessPiece *board[8][8], LastTurn &last_turn)
+                             ChessPiece *board[8][8], TurnInfo &last_turn)
 {
     bool success = false;
 

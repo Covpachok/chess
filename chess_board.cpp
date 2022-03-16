@@ -6,7 +6,7 @@
 extern Log gLog;
 #endif
 
-ChessBoard::ChessBoard() : last_turn()
+ChessBoard::ChessBoard()
 {
     board[0][0] = new RookPiece(TeamID::Black);
     board[0][1] = new KnightPiece(TeamID::Black);
@@ -51,7 +51,8 @@ ChessBoard::~ChessBoard()
 {
     for (int y = 0; y < kBoardSize; y++)
         for (int x = 0; x < kBoardSize; x++)
-            delete board[y][x];
+            if (board[y][x])
+                delete board[y][x];
 }
 
 void ChessBoard::DrawBoardCell(int x, int y) const
@@ -118,15 +119,23 @@ void ChessBoard::DrawBoardBorder() const
     }
 }
 
-void ChessBoard::MovePiece(int piece_x, int piece_y, int dest_x, int dest_y)
+bool ChessBoard::MovePiece(TeamID team_id, int piece_x, int piece_y, int dest_x,
+                           int dest_y, TurnInfo &last_turn)
 {
+    bool success = false;
+
     if (board[piece_y][piece_x] &&
+        board[piece_y][piece_x]->GetTeamID() == team_id &&
         board[piece_y][piece_x]->CanMovePiece(piece_x, piece_y, dest_x, dest_y,
                                               board, last_turn)) {
-        last_turn.ChangeLastTurn(piece_x, piece_y, dest_x, dest_y,
+        last_turn.ChangeTurnInfo(piece_x, piece_y, dest_x, dest_y,
                                  board[piece_y][piece_x]);
         board[dest_y][dest_x]   = board[piece_y][piece_x];
         board[piece_y][piece_x] = nullptr;
+
+        success = true;
     }
+
+    return success;
 }
 
