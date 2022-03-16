@@ -246,6 +246,9 @@ bool RookPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
                 }
             }
         }
+        // Castling
+    } else if (board[dest_y][dest_x]->GetTeamID() == team_id &&
+               board[dest_y][dest_x]->GetPieceID() == PieceID::King) {
     }
 
     if (success)
@@ -267,7 +270,63 @@ QueenPiece::QueenPiece(TeamID tid) : ChessPiece(PieceID::Queen, tid) {}
 bool QueenPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
                               ChessPiece *board[8][8], LastTurn &last_turn)
 {
-    return true;
+    bool success = false;
+
+#ifndef NDEBUG
+    fprintf(gLog,
+            "%s: Type Queen (curr_x)[%d] (curr_y)[%d] "
+            "(dest_x)[%d] (dest_y)[%d] (team_id)[%d]\n",
+            __func__, curr_x, curr_y, dest_x, dest_y,
+            static_cast<int>(team_id));
+#endif
+
+    if (!board[dest_y][dest_x] ||
+        board[dest_y][dest_x]->GetTeamID() != team_id) {
+        if ((curr_x != dest_x && curr_y == dest_y) ||
+            (curr_y != dest_y && curr_x == dest_x) ||
+            (curr_x - dest_x == curr_y - dest_y) ||
+            (dest_x - curr_x == curr_y - dest_y)) {
+            int x_direction =
+                curr_x == dest_x ? 0 : (curr_x - dest_x > 0 ? -1 : 1);
+            int y_direction =
+                curr_y == dest_y ? 0 : (curr_y - dest_y > 0 ? -1 : 1);
+            int distance = x_direction ? std::abs(curr_x - dest_x)
+                                       : std::abs(curr_y - dest_y);
+
+            success = true;
+            for (int i = 1; i < distance; i++) {
+#ifndef NDEBUG
+                fprintf(
+                    gLog,
+                    "%s: Queen (x_direction)[%d] (y_direction)[%d] "
+                    "(board[%d][%d])[%d]\n",
+                    __func__, x_direction, y_direction,
+                    curr_y + y_direction * i, curr_x + x_direction * i,
+                    board[curr_y + y_direction * i][curr_x + x_direction * i] !=
+                        nullptr);
+#endif
+                if (board[curr_y + y_direction * i][curr_x + x_direction * i]) {
+                    success = false;
+                    break;
+                }
+            }
+        }
+        // Castling
+    }
+
+    if (success)
+        has_moved_before = true;
+#ifndef NDEBUG
+    else
+        fprintf(
+            gLog,
+            "%s: Queen not moved from position (curr_x)[%d] (curr_y)[%d] to "
+            "(dest_x)[%d] (dest_y)[%d] (board[dest_y][dest_x])[%d]\n",
+            __func__, curr_x, curr_y, dest_x, dest_y,
+            board[dest_y][dest_x] != nullptr);
+#endif
+
+    return success;
 }
 
 KingPiece::KingPiece(TeamID tid) : ChessPiece(PieceID::King, tid) {}
@@ -275,6 +334,35 @@ KingPiece::KingPiece(TeamID tid) : ChessPiece(PieceID::King, tid) {}
 bool KingPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
                              ChessPiece *board[8][8], LastTurn &last_turn)
 {
-    return true;
+    bool success = false;
+
+#ifndef NDEBUG
+    fprintf(gLog,
+            "%s: Type Queen (curr_x)[%d] (curr_y)[%d] "
+            "(dest_x)[%d] (dest_y)[%d] (team_id)[%d]\n",
+            __func__, curr_x, curr_y, dest_x, dest_y,
+            static_cast<int>(team_id));
+#endif
+
+    if (!board[dest_y][dest_x] ||
+        board[dest_y][dest_x]->GetTeamID() != team_id) {
+        if (curr_x - dest_x <= 1 && curr_x - dest_x >= -1 &&
+                curr_y - dest_y <= 1 && curr_y - dest_y >= -1) {
+            success = true;
+        }
+    }
+
+    if (success)
+        has_moved_before = true;
+#ifndef NDEBUG
+    else
+        fprintf(gLog,
+                "%s: King not moved from position (curr_x)[%d] (curr_y)[%d] to "
+                "(dest_x)[%d] (dest_y)[%d] (board[dest_y][dest_x])[%d]\n",
+                __func__, curr_x, curr_y, dest_x, dest_y,
+                board[dest_y][dest_x] != nullptr);
+#endif
+
+    return success;
 }
 
