@@ -96,7 +96,7 @@ void ChessBoard::HighlightBoardCell(int x, int y) const
     int  color_pair;
     if (board[y][x]) {
         ch         = kPieceChars[board[y][x]->GetPieceID()];
-        color_pair = board[y][x]->GetColorPairID() + 7;
+        color_pair = static_cast<int>(board[y][x]->GetTeamID()) + 7;
     } else {
         ch         = ' ';
         color_pair = 7;

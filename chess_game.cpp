@@ -69,7 +69,8 @@ void ChessGame::HandleInput()
                     converted_y = mouse_event.y - 1;
                     if (converted_x >= 0 && converted_x < 8 &&
                         converted_y >= 0 && converted_y < 8) {
-                        if (!selected) {
+                        if (!selected &&
+                            !game_board.IsCellEmpty(converted_x, converted_y)) {
                             from_x = converted_x;
                             from_y = converted_y;
                             game_board.HighlightBoardCell(from_x, from_y);
@@ -81,7 +82,7 @@ void ChessGame::HandleInput()
                         }
                     }
                 } else if (mouse_event.bstate & BUTTON3_PRESSED) {
-                    if(selected)
+                    if (selected)
                         game_board.DrawBoardCell(from_x, from_y);
                     selected = false;
                 }
