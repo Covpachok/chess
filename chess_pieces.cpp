@@ -1,6 +1,7 @@
 #include "chess_pieces.h"
 #include "chess_board.h"
 
+#include <cstdlib>
 #include <ncurses.h>
 
 #ifndef NDEBUG
@@ -150,12 +151,19 @@ bool BishopPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
 {
     bool success = false;
 
+#ifndef NDEBUG
+    fprintf(gLog,
+            "%s: Type Bishop (curr_x)[%d] (curr_y)[%d] "
+            "(dest_x)[%d] (dest_y)[%d] (team_id)[%d]\n",
+            __func__, curr_x, curr_y, dest_x, dest_y,
+            static_cast<int>(team_id));
+#endif
+
     if (!board[dest_y][dest_x] ||
         board[dest_y][dest_x]->GetTeamID() != team_id) {
         if (curr_x - dest_x == curr_y - dest_y ||
             dest_x - curr_x == curr_y - dest_y) {
-            int distance =
-                curr_x - dest_x > 0 ? curr_x - dest_x : dest_x - curr_x;
+            int distance    = std::abs(curr_x - dest_x);
             int x_direction = curr_x - dest_x > 0 ? -1 : 1;
             int y_direction = curr_y - dest_y > 0 ? -1 : 1;
 
@@ -163,7 +171,10 @@ bool BishopPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
             for (int i = 1; i < distance; i++) {
 #ifndef NDEBUG
                 fprintf(
-                    gLog, "%s: (board[%d][%d])[%d]\n", __func__,
+                    gLog,
+                    "%s: Bishop (x_direction)[%d] (y_direction)[%d] "
+                    "(board[%d][%d])[%d]\n",
+                    __func__, x_direction, y_direction,
                     curr_y + y_direction * i, curr_x + x_direction * i,
                     board[curr_y + y_direction * i][curr_x + x_direction * i] !=
                         nullptr);
@@ -178,6 +189,15 @@ bool BishopPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
 
     if (success)
         has_moved_before = true;
+#ifndef NDEBUG
+    else
+        fprintf(
+            gLog,
+            "%s: Bishop not moved from position (curr_x)[%d] (curr_y)[%d] to "
+            "(dest_x)[%d] (dest_y)[%d] (board[dest_y][dest_x])[%d]\n",
+            __func__, curr_x, curr_y, dest_x, dest_y,
+            board[dest_y][dest_x] != nullptr);
+#endif
 
     return success;
 }
@@ -187,7 +207,59 @@ RookPiece::RookPiece(TeamID tid) : ChessPiece(PieceID::Rook, tid) {}
 bool RookPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
                              ChessPiece *board[8][8], LastTurn &last_turn)
 {
-    return true;
+    bool success = false;
+
+#ifndef NDEBUG
+    fprintf(gLog,
+            "%s: Type Rook (curr_x)[%d] (curr_y)[%d] "
+            "(dest_x)[%d] (dest_y)[%d] (team_id)[%d]\n",
+            __func__, curr_x, curr_y, dest_x, dest_y,
+            static_cast<int>(team_id));
+#endif
+
+    if (!board[dest_y][dest_x] ||
+        board[dest_y][dest_x]->GetTeamID() != team_id) {
+        if ((curr_x != dest_x && curr_y == dest_y) ||
+            (curr_y != dest_y && curr_x == dest_x)) {
+            int distance =
+                std::abs(curr_x - dest_x) + std::abs(curr_y - dest_y);
+            int x_direction =
+                curr_x == dest_x ? 0 : (curr_x - dest_x > 0 ? -1 : 1);
+            int y_direction =
+                curr_y == dest_y ? 0 : (curr_y - dest_y > 0 ? -1 : 1);
+
+            success = true;
+            for (int i = 1; i < distance; i++) {
+#ifndef NDEBUG
+                fprintf(
+                    gLog,
+                    "%s: Rook (x_direction)[%d] (y_direction)[%d] "
+                    "(board[%d][%d])[%d]\n",
+                    __func__, x_direction, y_direction,
+                    curr_y + y_direction * i, curr_x + x_direction * i,
+                    board[curr_y + y_direction * i][curr_x + x_direction * i] !=
+                        nullptr);
+#endif
+                if (board[curr_y + y_direction * i][curr_x + x_direction * i]) {
+                    success = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (success)
+        has_moved_before = true;
+#ifndef NDEBUG
+    else
+        fprintf(gLog,
+                "%s: Rook not moved from position (curr_x)[%d] (curr_y)[%d] to "
+                "(dest_x)[%d] (dest_y)[%d] (board[dest_y][dest_x])[%d]\n",
+                __func__, curr_x, curr_y, dest_x, dest_y,
+                board[dest_y][dest_x] != nullptr);
+#endif
+
+    return success;
 }
 
 QueenPiece::QueenPiece(TeamID tid) : ChessPiece(PieceID::Queen, tid) {}
