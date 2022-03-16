@@ -19,10 +19,15 @@ public:
     bool MovePiece(TeamID team_id, int piece_x, int piece_y, int dest_x,
                    int dest_y, TurnInfo &last_turn);
 
+    void HighlightBoardCell(int x, int y) const;
     void DrawBoardCell(int x, int y) const;
     void DrawBoard() const;
     void DrawBoardBorder() const;
     bool IsCellEmpty(int x, int y) const { return board[y][x] == nullptr; }
+    bool AreCoordsCorrect(int x, int y) const
+    {
+        return x >= 0 && x <= 7 && y >= 0 && y <= 7;
+    }
 };
 
 #endif

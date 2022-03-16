@@ -24,9 +24,9 @@ void ChessGame::Chess()
             team_current_turn = team_current_turn == TeamID::White
                                     ? TeamID::Black
                                     : TeamID::White;
-            game_board.DrawBoard();
-            refresh();
         }
+        game_board.DrawBoard();
+        refresh();
     }
 }
 
@@ -45,12 +45,14 @@ void ChessGame::InitScreen()
 
 void ChessGame::InitColors()
 {
-    init_pair(1, COLOR_WHITE, COLOR_CYAN);
-    init_pair(2, COLOR_WHITE, COLOR_BLUE);
-    init_pair(3, COLOR_BLACK, COLOR_CYAN);
-    init_pair(4, COLOR_BLACK, COLOR_BLUE);
+    init_pair(1, COLOR_WHITE, COLOR_BLUE);
+    init_pair(2, COLOR_WHITE, COLOR_CYAN);
+    init_pair(3, COLOR_BLACK, COLOR_BLUE);
+    init_pair(4, COLOR_BLACK, COLOR_CYAN);
     init_pair(5, COLOR_WHITE, COLOR_RED);
     init_pair(6, COLOR_BLACK, COLOR_RED);
+    init_pair(7, COLOR_WHITE, COLOR_YELLOW);
+    init_pair(8, COLOR_BLACK, COLOR_YELLOW);
 }
 
 void ChessGame::HandleInput()
@@ -62,21 +64,26 @@ void ChessGame::HandleInput()
         switch (key) {
         case KEY_MOUSE:
             if (getmouse(&mouse_event) == OK) {
-                if (mouse_event.bstate & BUTTON1_RELEASED) {
+                if (mouse_event.bstate & BUTTON1_PRESSED) {
                     converted_x = (mouse_event.x - 2) / 2;
                     converted_y = mouse_event.y - 1;
                     if (converted_x >= 0 && converted_x < 8 &&
                         converted_y >= 0 && converted_y < 8) {
                         if (!selected) {
-                            from_x   = converted_x;
-                            from_y   = converted_y;
+                            from_x = converted_x;
+                            from_y = converted_y;
+                            game_board.HighlightBoardCell(from_x, from_y);
                             selected = true;
                         } else {
-                            to_x = converted_x;
-                            to_y = converted_y;
+                            to_x    = converted_x;
+                            to_y    = converted_y;
                             success = true;
                         }
                     }
+                } else if (mouse_event.bstate & BUTTON3_PRESSED) {
+                    if(selected)
+                        game_board.DrawBoardCell(from_x, from_y);
+                    selected = false;
                 }
             }
             break;

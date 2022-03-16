@@ -90,6 +90,23 @@ void ChessBoard::DrawBoard() const
             DrawBoardCell(x, y);
 }
 
+void ChessBoard::HighlightBoardCell(int x, int y) const
+{
+    char ch;
+    int  color_pair;
+    if (board[y][x]) {
+        ch         = kPieceChars[board[y][x]->GetPieceID()];
+        color_pair = board[y][x]->GetColorPairID() + 7;
+    } else {
+        ch         = ' ';
+        color_pair = 7;
+    }
+
+    attrset(COLOR_PAIR(color_pair) | A_BOLD);
+    mvprintw(1 + y, 2 + x * 2, " %c", ch);
+    attroff(COLOR_PAIR(color_pair) | A_BOLD);
+}
+
 void ChessBoard::DrawBoardBorder() const
 {
     for (int y = 0; y < kBoardSize + 2; y++) {
@@ -124,7 +141,8 @@ bool ChessBoard::MovePiece(TeamID team_id, int piece_x, int piece_y, int dest_x,
 {
     bool success = false;
 
-    if (board[piece_y][piece_x] &&
+    if (AreCoordsCorrect(piece_x, piece_y) &&
+        AreCoordsCorrect(dest_x, dest_y) && board[piece_y][piece_x] &&
         board[piece_y][piece_x]->GetTeamID() == team_id &&
         board[piece_y][piece_x]->CanMovePiece(piece_x, piece_y, dest_x, dest_y,
                                               board, last_turn)) {
