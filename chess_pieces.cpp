@@ -168,7 +168,7 @@ bool BishopPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
             int y_direction = curr_y - dest_y > 0 ? -1 : 1;
 
             success = true;
-            for (int i = 1; i < distance; i++) {
+            for (int i = 1; i < distance; ++i) {
 #ifndef NDEBUG
                 fprintf(
                     gLog,
@@ -229,7 +229,7 @@ bool RookPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
                 curr_y == dest_y ? 0 : (curr_y - dest_y > 0 ? -1 : 1);
 
             success = true;
-            for (int i = 1; i < distance; i++) {
+            for (int i = 1; i < distance; ++i) {
 #ifndef NDEBUG
                 fprintf(
                     gLog,
@@ -294,7 +294,7 @@ bool QueenPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
                                        : std::abs(curr_y - dest_y);
 
             success = true;
-            for (int i = 1; i < distance; i++) {
+            for (int i = 1; i < distance; ++i) {
 #ifndef NDEBUG
                 fprintf(
                     gLog,
@@ -311,7 +311,6 @@ bool QueenPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
                 }
             }
         }
-        // Castling
     }
 
     if (success)
@@ -338,7 +337,7 @@ bool KingPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
 
 #ifndef NDEBUG
     fprintf(gLog,
-            "%s: Type Queen (curr_x)[%d] (curr_y)[%d] "
+            "%s: Type King (curr_x)[%d] (curr_y)[%d] "
             "(dest_x)[%d] (dest_y)[%d] (team_id)[%d]\n",
             __func__, curr_x, curr_y, dest_x, dest_y,
             static_cast<int>(team_id));
@@ -347,10 +346,10 @@ bool KingPiece::CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
     if (!board[dest_y][dest_x] ||
         board[dest_y][dest_x]->GetTeamID() != team_id) {
         if (curr_x - dest_x <= 1 && curr_x - dest_x >= -1 &&
-                curr_y - dest_y <= 1 && curr_y - dest_y >= -1) {
+            curr_y - dest_y <= 1 && curr_y - dest_y >= -1) {
             success = true;
         }
-    }
+    } 
 
     if (success)
         has_moved_before = true;
