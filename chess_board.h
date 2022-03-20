@@ -24,6 +24,8 @@ public:
     void DrawBoard() const;
     void DrawBoardBorder() const;
 
+    bool CheckForCheckMate(TeamID team_id);
+
     bool IsCellEmpty(int x, int y) const { return board[y][x] == nullptr; }
     bool AreCoordsCorrect(int x, int y) const
     {
@@ -32,7 +34,6 @@ public:
 private:
     bool CheckForCastling(int first_x, int first_y, int secnd_x, int secnd_y);
     bool CanDoCastling(int first_x, int first_y, int secnd_x, int secnd_y);
-    bool CheckForCheckMate(TeamID team_id, int king_x, int king_y);
 };
 
 #endif

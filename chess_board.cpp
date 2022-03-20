@@ -135,8 +135,9 @@ bool ChessBoard::MovePiece(TeamID team_id, int piece_x, int piece_y, int dest_x,
     bool success = false;
 
     if (AreCoordsCorrect(piece_x, piece_y) &&
-        AreCoordsCorrect(dest_x, dest_y) && board[piece_y][piece_x] &&
-        board[piece_y][piece_x]->GetTeamID() == team_id) {
+        AreCoordsCorrect(dest_x, dest_y) && board[piece_y][piece_x]
+        ) {
+        // board[piece_y][piece_x]->GetTeamID() == team_id
 
         // Castling
         if (board[dest_y][dest_x] &&
@@ -144,7 +145,8 @@ bool ChessBoard::MovePiece(TeamID team_id, int piece_x, int piece_y, int dest_x,
             CanDoCastling(piece_x, piece_y, dest_x, dest_y)) {
             int         team_y, rook_x, king_x;
             ChessPiece *king, *rook;
-            if (board[piece_y][piece_x]->GetPieceID() == PieceID::King) {
+
+            if (board[piece_y][piece_x]->GetPieceID() == ChessPiece::King) {
                 king   = board[piece_y][piece_x];
                 rook   = board[dest_y][dest_x];
                 rook_x = dest_x;
@@ -195,10 +197,10 @@ bool ChessBoard::CheckForCastling(int first_x, int first_y, int secnd_x,
                           !board[secnd_y][secnd_x]->HasMovedBefore();
 
     bool king_and_rook =
-        (board[first_y][first_x]->GetPieceID() == PieceID::King &&
-         board[secnd_y][secnd_x]->GetPieceID() == PieceID::Rook) ||
-        (board[first_y][first_x]->GetPieceID() == PieceID::Rook &&
-         board[secnd_y][secnd_x]->GetPieceID() == PieceID::King);
+        (board[first_y][first_x]->GetPieceID() == ChessPiece::King &&
+         board[secnd_y][secnd_x]->GetPieceID() == ChessPiece::Rook) ||
+        (board[first_y][first_x]->GetPieceID() == ChessPiece::Rook &&
+         board[secnd_y][secnd_x]->GetPieceID() == ChessPiece::King);
 
     bool have_same_team = board[secnd_y][secnd_x]->GetTeamID() ==
                           board[first_y][first_x]->GetTeamID();
@@ -223,22 +225,105 @@ bool ChessBoard::CanDoCastling(int first_x, int first_y, int secnd_x,
     return success;
 }
 
-// Under construction :^) 
-bool ChessBoard::CheckForCheckMate(TeamID team_id, int king_x, int king_y)
+// UNDER DEVELOPEMENT
+bool ChessBoard::CheckForCheckMate(TeamID team_id)
 {
-    int      checkmate = false;
-    TurnInfo temp;
+    bool checkmate        = false;
+    // INCORRECT
+    int  checkmate_checks = 0;
+
+    int  king_x = -1, king_y = -1;
+    bool king_finded = false;
+
     for (int y = 0; y < 8; ++y) {
         for (int x = 0; x < 8; ++x) {
-            if (board[y][x] && board[y][x]->GetTeamID() != team_id &&
-                board[y][x]->CanMovePiece(x, y, king_x, king_y, board, temp)) {
-                checkmate = true;
+            if (board[y][x] && board[y][x]->GetTeamID() == team_id &&
+                board[y][x]->GetPieceID() == ChessPiece::King) {
+                king_x      = x;
+                king_y      = y;
+                king_finded = true;
                 break;
             }
         }
-        if (checkmate)
+        if (king_finded)
             break;
     }
+
+    TurnInfo    temp;
+    ChessPiece *king      = board[king_y][king_x];
+    board[king_y][king_x] = nullptr;
+
+    for (int y = 0; y < 8; ++y) {
+        for (int x = 0; x < 8; ++x) {
+            if (board[y][x] && board[y][x]->GetTeamID() != team_id) {
+                if (board[y][x]->GetPieceID() == ChessPiece::Pawn)
+                    board[king_y][king_x] = king;
+
+                if (board[y][x]->CanMovePiece(x, y, king_x, king_y, board,
+                                              temp))
+                    ++checkmate_checks; // INCORRECT
+
+                if (king_y - 1 >= 0 && !board[king_y - 1][king_x] &&
+                    board[y][x]->CanMovePiece(x, y, king_x, king_y - 1, board,
+                                              temp))
+                    ++checkmate_checks; // INCORRECT
+
+                if (king_y + 1 <= 7 && !board[king_y + 1][king_x] &&
+                    board[y][x]->CanMovePiece(x, y, king_x, king_y + 1, board,
+                                              temp))
+                    ++checkmate_checks; // INCORRECT
+
+                if (king_x - 1 >= 0) {
+                    if (!board[king_y][king_x - 1] &&
+                        board[y][x]->CanMovePiece(x, y, king_x - 1, king_y,
+                                                  board, temp))
+                        ++checkmate_checks; // INCORRECT
+
+                    if (king_y - 1 >= 0 && !board[king_y - 1][king_x - 1] &&
+                        board[y][x]->CanMovePiece(x, y, king_x - 1, king_y - 1,
+                                                  board, temp))
+                        ++checkmate_checks; // INCORRECT
+
+                    if (king_y + 1 <= 7 && !board[king_y - 1][king_x + 1] &&
+                        board[y][x]->CanMovePiece(x, y, king_x - 1, king_y + 1,
+                                                  board, temp))
+                        ++checkmate_checks; // INCORRECT
+
+                }
+
+                if (king_x + 1 <= 7) {
+                    if (!board[king_y][king_x + 1] &&
+                        board[y][x]->CanMovePiece(x, y, king_x + 1, king_y,
+                                                  board, temp))
+                        ++checkmate_checks; // INCORRECT
+
+                    if (king_y - 1 >= 0 && !board[king_y - 1][king_x + 1] &&
+                        board[y][x]->CanMovePiece(x, y, king_x + 1, king_y - 1,
+                                                  board, temp))
+                        ++checkmate_checks; // INCORRECT
+
+                    if (king_y + 1 <= 7 && !board[king_y + 1][king_x + 1] &&
+                        board[y][x]->CanMovePiece(x, y, king_x + 1, king_y + 1,
+                                                  board, temp))
+                        ++checkmate_checks; // INCORRECT
+                }
+
+                if (board[y][x]->GetPieceID() == ChessPiece::Pawn)
+                    board[king_y][king_x] = nullptr;
+            }
+        }
+    }
+
+    board[king_y][king_x] = king;
+
+    // INCORRECT!!!!!!
+    if (checkmate_checks >= 9)
+        checkmate = true;
+
+#ifndef NDEBUG
+    fprintf(gLog, "%s: %d\n", __func__, checkmate_checks);
+    fflush(gLog);
+#endif
     return checkmate;
 }
 

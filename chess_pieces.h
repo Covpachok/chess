@@ -4,25 +4,36 @@
 #include <ncurses.h>
 
 enum class TeamID { White, Black };
-enum PieceID { Pawn, Knight, Bishop, Rook, Queen, King };
 
 const char kPieceChars[] = {'p', 'N', 'B', 'R', 'Q', 'K'};
 
 class ChessPiece;
 
 class TurnInfo {
-public:
-    int         from_x, from_y;
-    int         to_x, to_y;
+    int         src_x, src_y;
+    int         dest_x, dest_y;
     ChessPiece *piece;
 
+public:
     TurnInfo();
     ~TurnInfo() {}
-    void ChangeTurnInfo(int old_x, int old_y, int new_x, int new_y,
-                        ChessPiece *new_piece);
+    void ChangeTurnInfo(int src_x, int src_y, int dest_x, int dest_y,
+                        ChessPiece *piece);
+
+    int GetXDistance() const { return src_x - dest_x; }
+    int GetYDistance() const { return src_y - dest_y; }
+    int GetSourceX() const { return src_x; }
+    int GetSourceY() const { return src_y; }
+    int GetDestinationX() const { return dest_x; }
+    int GetDestinationY() const { return dest_y; }
+
+    ChessPiece *GetPiece() const { return piece; }
 };
 
 class ChessPiece {
+public:
+    enum PieceID { Pawn, Knight, Bishop, Rook, Queen, King };
+
 protected:
     PieceID piece_id;
     TeamID  team_id;
@@ -35,7 +46,7 @@ public:
     virtual ~ChessPiece(){};
 
     virtual bool CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                              ChessPiece *board[8][8], TurnInfo &last_turn) = 0;
+                              ChessPiece *board[8][8], TurnInfo &prev_turn) = 0;
 
     PieceID GetPieceID() const { return piece_id; }
     TeamID  GetTeamID() const { return team_id; }
@@ -43,9 +54,13 @@ public:
     bool    HasMovedBefore() const { return has_moved_before; }
 
 protected:
-    bool IsTargetCapturable(ChessPiece *target)
+    bool CanMoveTo(ChessPiece *dest) const
     {
-        return target ? target->GetTeamID() != team_id : false;
+        return !dest || dest->GetTeamID() != team_id;
+    }
+    bool IsTargetCapturable(ChessPiece *target) const
+    {
+        return target && target->GetTeamID() != team_id;
     }
 };
 
@@ -55,7 +70,10 @@ public:
     virtual ~PawnPiece() {}
 
     virtual bool CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                              ChessPiece *board[8][8], TurnInfo &last_turn);
+                              ChessPiece *board[8][8], TurnInfo &prev_turn);
+
+private:
+    bool CheckForEnPassant(TurnInfo prev_turn, int dest_x);
 };
 
 class KnightPiece : public ChessPiece {
@@ -64,7 +82,7 @@ public:
     virtual ~KnightPiece() {}
 
     virtual bool CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                              ChessPiece *board[8][8], TurnInfo &last_turn);
+                              ChessPiece *board[8][8], TurnInfo &prev_turn);
 };
 
 class BishopPiece : public ChessPiece {
@@ -73,7 +91,7 @@ public:
     virtual ~BishopPiece() {}
 
     virtual bool CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                              ChessPiece *board[8][8], TurnInfo &last_turn);
+                              ChessPiece *board[8][8], TurnInfo &prev_turn);
 };
 
 class RookPiece : public ChessPiece {
@@ -82,7 +100,7 @@ public:
     virtual ~RookPiece() {}
 
     virtual bool CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                              ChessPiece *board[8][8], TurnInfo &last_turn);
+                              ChessPiece *board[8][8], TurnInfo &prev_turn);
 };
 
 class QueenPiece : public ChessPiece {
@@ -91,7 +109,7 @@ public:
     virtual ~QueenPiece() {}
 
     virtual bool CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                              ChessPiece *board[8][8], TurnInfo &last_turn);
+                              ChessPiece *board[8][8], TurnInfo &prev_turn);
 };
 
 class KingPiece : public ChessPiece {
@@ -100,7 +118,7 @@ public:
     virtual ~KingPiece() {}
 
     virtual bool CanMovePiece(int curr_x, int curr_y, int dest_x, int dest_y,
-                              ChessPiece *board[8][8], TurnInfo &last_turn);
+                              ChessPiece *board[8][8], TurnInfo &prev_turn);
 };
 
 #endif
